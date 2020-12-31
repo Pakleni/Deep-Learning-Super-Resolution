@@ -1,1 +1,1 @@
-# Supersampling
+# Deep Learning Super-Resolution
