@@ -68,23 +68,15 @@ def denorm(x):
     return (x*255).astype("int32")
 
 
-def gioLoss(y_true, y_pred):
-    ret = 0
-    ret += keras.losses.MeanSquaredError()(y_true, y_pred)
-    ret += SSIMLoss(y_true, y_pred) * 20
-    ret += vggLoss(y_true,y_pred) / 10
-    return ret
-
-
 
 
 train = False
 create = False
 
 batch_size = 20
-n = 0.0000003
-epochs = 200
-num = 3200
+n = 0.0003
+epochs = 50
+num = 800
 optimizer = keras.optimizers.Adam(learning_rate=n)
 loss_fn = SSIMLoss
 
@@ -102,9 +94,12 @@ if (train):
 
     if(create):
 
+        # from models.basic import model
+        # from models.basic_padd import model
         # from models.ninetwo import model
-        from models.ninefive_goog import model
-        # from models.pace import model
+        # from models.ninefive import model
+        # from models.depth_to_space import model
+        from models.transpose import model
 
 
 
@@ -116,7 +111,7 @@ if (train):
                     loss=loss_fn,
                     metrics=['accuracy'])
     else:
-        model = tf.keras.models.load_model('./saved-models/model.h5', custom_objects={'SSIMLoss': SSIMLoss, 'vggLoss': vggLoss})
+        model = tf.keras.models.load_model('./saved-models/model.h5', custom_objects={'SSIMLoss': SSIMLoss, 'vggLoss': vggLoss, 'psnr': psnr})
         model.compile(optimizer=optimizer,
                     loss=loss_fn,
                     metrics=['accuracy'])
@@ -181,7 +176,7 @@ if (train):
     plt.show()
 
 else:
-    model = tf.keras.models.load_model('./saved-models/model.h5', custom_objects={'SSIMLoss': SSIMLoss,'vggLoss': vggLoss})
+    model = tf.keras.models.load_model('./saved-models/model.h5', custom_objects={'SSIMLoss': SSIMLoss,'vggLoss': vggLoss, 'psnr': psnr})
 
 
 
@@ -214,8 +209,7 @@ for lr_img, hr_img in valid_ds.take(40):
     width = int(lr_img_shape[1].numpy())
     height = int(lr_img_shape[0].numpy())
 
-    factorStride = 2
-
+    factorStride = 1
     stride = lr_crop_size // factorStride
     # stride = 48
     
