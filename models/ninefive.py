@@ -23,14 +23,12 @@ x2_2 = layers.Conv2D(32, (3, 3), activation='relu') (x1_1) #48
 x2_3 = layers.Conv2D(32, (5, 5), activation='relu') (x1_2) #48
 x2_4 = layers.Conv2D(32, (7, 7), activation='relu') (x1_3) #48
 
-x2 = layers.Concatenate() ([x2_1, x2_2, x2_3, x2_4])
+x2 = layers.Concatenate() ([x2_1, x2_2, x2_3, x2_4]) #48 (128)
 
 x3 = tf.pad(x2, paddings, "SYMMETRIC") #50
 x4 = layers.Conv2D(128, (3, 3), activation='relu') (x3) #48
 
 x5 = layers.MaxPooling2D((2, 2))(x4) #24
-
-#pool-gang-2
 
 x18 = x5
 
@@ -48,7 +46,7 @@ x19_2 = layers.Conv2D(32, (3, 3), activation='relu') (x18_1) #24
 x19_3 = layers.Conv2D(32, (5, 5), activation='relu') (x18_2) #24
 x19_4 = layers.Conv2D(32, (7, 7), activation='relu') (x18_3) #24
 
-x19 = layers.Concatenate() ([x19_1, x19_2, x19_3, x19_4])
+x19 = layers.Concatenate() ([x19_1, x19_2, x19_3, x19_4]) #24 (128)
 
 x20 = tf.pad(x19, paddings, "SYMMETRIC") #26
 x21 = layers.Conv2D(128, (3, 3), activation='relu') (x20) #24
@@ -74,13 +72,13 @@ x26_2 = layers.Conv2D(32, (3, 3), activation='relu') (x25_1) #48
 x26_3 = layers.Conv2D(32, (5, 5), activation='relu') (x25_2) #48
 x26_4 = layers.Conv2D(32, (7, 7), activation='relu') (x25_3) #48
 
-x26 = layers.Concatenate() ([x26_1, x26_2, x26_3, x26_4]) #48 (64)
+x26 = layers.Concatenate() ([x26_1, x26_2, x26_3, x26_4]) #48 (128)
 
 x27 = tf.pad(x26, paddings, "SYMMETRIC") #50
 x28 = layers.Conv2D(128, (3, 3), activation='relu') (x27) #48
 x29 = layers.Conv2D(64, (1, 1), activation='relu') (x28) #48
 
-x30 = layers.Concatenate() ([x4, x29, Input_img]) #48
+x30 = layers.Concatenate() ([x4, x29, Input_img]) #48 (64 + 128 + 3)
 x31 = layers.UpSampling2D(size=(2, 2))(x30) #96
 
 #output-gangaroos

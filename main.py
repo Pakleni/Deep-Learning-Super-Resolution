@@ -23,9 +23,9 @@ session = InteractiveSession(config=config)
 #vgg stuff
 from tensorflow.keras.applications.vgg19 import VGG19, preprocess_input
 
-tf.config.experimental_run_functions_eagerly(True)
+# tf.config.experimental_run_functions_eagerly(True)
 
-tf.config.run_functions_eagerly(True)
+# tf.config.run_functions_eagerly(True)
 
 
 def vggLoss(X,Y):
@@ -70,13 +70,13 @@ def denorm(x):
 
 
 
-train = False
+train = True
 create = False
 
 batch_size = 20
-n = 0.0003
-epochs = 50
-num = 800
+n = 0.00003
+epochs = 400
+num = 3600
 optimizer = keras.optimizers.Adam(learning_rate=n)
 loss_fn = SSIMLoss
 
@@ -94,12 +94,22 @@ if (train):
 
     if(create):
 
-        # from models.basic import model
-        # from models.basic_padd import model
         # from models.ninetwo import model
         # from models.ninefive import model
         # from models.depth_to_space import model
-        from models.transpose import model
+
+        from models.basic import model
+        # from models.depth_inc import model
+        # from models.skip import model
+        # from models.skip2 import model
+        # from models.inception import model
+        # from models.inception_no7 import model
+        # from models.inception_no7_less import model
+
+        # from models.unet import model
+
+        # from models.deep_basic import model
+
 
 
 
@@ -157,8 +167,15 @@ if (train):
 
 
     #TRAIN DA BITCH
-    history = model.fit(x = the_lr_tr, y = the_hr_tr,batch_size=batch_size, epochs=epochs, 
-                        validation_data=(the_lr_vl, the_hr_vl))
+
+    early_stopping = tf.keras.callbacks.EarlyStopping(patience=10)
+
+    history = model.fit(x = the_lr_tr,
+                        y = the_hr_tr,
+                        batch_size=batch_size,
+                        epochs=epochs, 
+                        validation_data=(the_lr_vl, the_hr_vl),
+                        callbacks=[early_stopping])
 
     #SAVE THE NN
     model.save("./saved-models/model.h5")
@@ -169,11 +186,13 @@ if (train):
     plt.plot(history.history['loss'], label='loss')
     plt.plot(history.history['val_loss'], label = 'val_loss')
     plt.xlabel('Epoch')
-    plt.ylabel('Accuracy')
-    plt.ylim([0.062, 0.075])
+    plt.ylabel('Loss')
+    plt.ylim(top=0.12)
     plt.legend(loc='lower right')
 
+
     plt.show()
+
 
 else:
     model = tf.keras.models.load_model('./saved-models/model.h5', custom_objects={'SSIMLoss': SSIMLoss,'vggLoss': vggLoss, 'psnr': psnr})
