@@ -23,6 +23,7 @@ session = InteractiveSession(config=config)
 #vgg stuff
 from tensorflow.keras.applications.vgg19 import VGG19, preprocess_input
 
+#UNCOMMENT THESE TWO IF USING VGG LOSS CAUSES PROBLEMS
 # tf.config.experimental_run_functions_eagerly(True)
 
 # tf.config.run_functions_eagerly(True)
@@ -71,10 +72,10 @@ def denorm(x):
 
 
 train = True
-create = False
+create = True
 
 batch_size = 20
-n = 0.00003
+n = 0.0003
 epochs = 400
 num = 3600
 optimizer = keras.optimizers.Adam(learning_rate=n)
@@ -94,27 +95,15 @@ if (train):
 
     if(create):
 
-        # from models.ninetwo import model
-        # from models.ninefive import model
-        # from models.depth_to_space import model
-
+        
         from models.basic import model
-        # from models.depth_inc import model
-        # from models.skip import model
-        # from models.skip2 import model
         # from models.inception import model
         # from models.inception_no7 import model
-        # from models.inception_no7_less import model
-
         # from models.unet import model
+        # from models.depth import model
+        # from models.resnet import model
 
-        # from models.deep_basic import model
-
-
-
-
-        print(model.summary())
-
+        # print(model.summary())
         # exit(1)
 
         model.compile(optimizer=optimizer,
@@ -180,7 +169,7 @@ if (train):
     #SAVE THE NN
     model.save("./saved-models/model.h5")
 
-    sys.exit()
+    # sys.exit()
 
     # PLOT DATA
     plt.plot(history.history['loss'], label='loss')
@@ -199,11 +188,9 @@ else:
 
 
 
+
+
 valid_ds = valid_loader.dataset(batch_size=1, repeat_count=1, random_transform=False)
-
-# print(model.summary())
-
-# exit(1)
 
 
 lr_crop_size = 48
