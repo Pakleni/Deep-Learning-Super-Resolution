@@ -24,13 +24,25 @@ session = InteractiveSession(config=config)
 from tensorflow.keras.applications.vgg19 import VGG19, preprocess_input
 
 #UNCOMMENT THESE TWO IF USING VGG LOSS CAUSES PROBLEMS
-# tf.config.experimental_run_functions_eagerly(True)
+tf.config.experimental_run_functions_eagerly(True)
 
-# tf.config.run_functions_eagerly(True)
-
+tf.config.run_functions_eagerly(True)
 
 def vggLoss(X,Y):
     vgg_model = VGG19(include_top=False)
+
+    Xt = preprocess_input(X*255)
+    Yt = preprocess_input(Y*255)
+    
+    vggX = vgg_model(Xt)
+    vggY = vgg_model(Yt)
+
+    return tf.reduce_mean(tf.square(vggY-vggX))
+
+def VGGFeatureLoss(X,Y):
+    vgg_model = VGG19(include_top=False)
+
+    vgg_model = vgg_model.get_layer(name= 'block1_conv2')
 
     Xt = preprocess_input(X*255)
     Yt = preprocess_input(Y*255)
@@ -71,8 +83,8 @@ def denorm(x):
 
 
 
-train = Train
-create = Train
+train = True
+create = True
 
 patience = 10
 batch_size = 20
@@ -80,7 +92,7 @@ n = 0.0003
 epochs = 400
 num = 3600
 optimizer = keras.optimizers.Adam(learning_rate=n)
-loss_fn = SSIMLoss
+loss_fn = VGGFeatureLoss
 
 
 
