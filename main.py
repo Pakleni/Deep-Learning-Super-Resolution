@@ -20,7 +20,6 @@ config.gpu_options.allow_growth = True
 session = InteractiveSession(config=config)
 #end config stuff
 
-#vgg stuff
 from tensorflow.keras.applications.vgg19 import VGG19, preprocess_input
 
 #UNCOMMENT THESE TWO IF USING VGG LOSS CAUSES PROBLEMS
@@ -28,8 +27,9 @@ tf.config.experimental_run_functions_eagerly(True)
 
 tf.config.run_functions_eagerly(True)
 
+
 def vggLoss(X,Y):
-    vgg_model = VGG19(include_top=False)
+    vgg_model = VGG19(include_top=False, input_shape=(96,96,3))
 
     Xt = preprocess_input(X*255)
     Yt = preprocess_input(Y*255)
@@ -39,19 +39,30 @@ def vggLoss(X,Y):
 
     return tf.reduce_mean(tf.square(vggY-vggX))
 
-def VGGFeatureLoss(X,Y):
-    vgg_model = VGG19(include_top=False)
-
-    vgg_model = vgg_model.get_layer(name= 'block1_conv2')
-
+def VGGStyleLoss(X,Y):
     Xt = preprocess_input(X*255)
     Yt = preprocess_input(Y*255)
-
-    vggX = vgg_model(Xt)
-    vggY = vgg_model(Yt)
     
-    return tf.reduce_mean(tf.square(vggY-vggX))
-#end vgg stuff
+    vgg_model = VGG19(include_top=False, input_shape=(96,96,3))
+
+    Xx = vgg_model.input
+    
+    layerNames = [ [1,2], [2,2], [3,4], [4,4], [5,4] ]
+
+    ret = 0;
+    for i in layerNames:
+
+        Yy = vgg_model.get_layer(name= f'block{i[0]}_conv{i[1]}').output
+
+        curr = keras.models.Model(Xx,Yy)
+
+
+        vggX = curr(Xt)
+        vggY = curr(Yt)
+        
+        ret +=  tf.reduce_mean(tf.square(vggY-vggX))/(curr.output_shape[1]*curr.output_shape[2]*curr.output_shape[3])
+
+    return ret
 
 def SSIMLoss(y_true, y_pred):
     return 1 - tf.reduce_mean(tf.image.ssim(y_true, y_pred, norm(255)))
@@ -85,6 +96,7 @@ def denorm(x):
 
 train = True
 create = True
+rerun = False
 
 patience = 10
 batch_size = 20
@@ -92,7 +104,7 @@ n = 0.0003
 epochs = 400
 num = 3600
 optimizer = keras.optimizers.Adam(learning_rate=n)
-loss_fn = VGGFeatureLoss
+loss_fn = VGGStyleLoss
 
 
 
@@ -123,7 +135,11 @@ if (train):
                     loss=loss_fn,
                     metrics=['accuracy'])
     else:
-        model = tf.keras.models.load_model('./saved-models/model.h5', custom_objects={'SSIMLoss': SSIMLoss, 'vggLoss': vggLoss, 'psnr': psnr})
+        model = tf.keras.models.load_model('./saved-models/model.h5', 
+                                            custom_objects={'SSIMLoss': SSIMLoss, 
+                                                            'VGGStyleLoss': VGGStyleLoss, 
+                                                            'vggLoss': vggLoss,
+                                                            'psnr': psnr})
         model.compile(optimizer=optimizer,
                     loss=loss_fn,
                     metrics=['accuracy'])
@@ -182,14 +198,14 @@ if (train):
     #SAVE THE NN
     model.save("./saved-models/model.h5")
 
-    sys.exit()
+    if (rerun):
+        sys.exit()
 
     # PLOT DATA
     plt.plot(history.history['loss'], label='loss')
     plt.plot(history.history['val_loss'], label = 'val_loss')
     plt.xlabel('Epoch')
     plt.ylabel('Loss')
-    plt.ylim(top=10)
     plt.legend(loc='lower right')
 
 
@@ -197,7 +213,11 @@ if (train):
 
 
 else:
-    model = tf.keras.models.load_model('./saved-models/model.h5', custom_objects={'SSIMLoss': SSIMLoss,'vggLoss': vggLoss, 'psnr': psnr})
+    model = tf.keras.models.load_model('./saved-models/model.h5',
+                                    custom_objects={'SSIMLoss': SSIMLoss,
+                                                    'VGGStyleLoss': VGGStyleLoss,
+                                                    'vggLoss': vggLoss,
+                                                    'psnr': psnr})
 
 
 
