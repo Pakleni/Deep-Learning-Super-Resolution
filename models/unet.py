@@ -32,6 +32,12 @@ def down(x, num):
 
     return x
 
+def up(x, num):
+    #x = layers.Conv2DTranspose(num, (2,2),strides=(2,2), activation = 'relu')(x)
+    x = layers.Conv2D(num, (1,1), activation = 'relu')(x) #12
+    x = layers.UpSampling2D(size=(2, 2))(x) #96
+    return x
+
 Input_img = keras.Input(shape=(48, 48, 3)) #48
 
 x1 =    down(x = Input_img, num = 64)
@@ -48,25 +54,25 @@ x4 =                layers.MaxPooling2D((2, 2))(x3) #6
 
 x4 =                down (x = x4, num = 512)
 
-x7 =            layers.Conv2DTranspose(256, (2,2),strides=(2,2), activation = 'relu')(x4) #12
+x7 =            up(num = 256, x = x4) #12
 
 x7 =            layers.Concatenate() ([x3, x7])
 
 x7 =            basic (x = x7, num = 256)
 
-x8 =        layers.Conv2DTranspose(128, (2,2),strides=(2,2), activation = 'relu')(x7) #24
+x8 =        up(num = 128, x = x7) #24
 
 x8 =        layers.Concatenate() ([x2, x8])
 
 x8 =        basic (x = x8, num = 128)
 
-x9 =    layers.Conv2DTranspose(64, (2,2),strides=(2,2), activation = 'relu')(x8) #48
+x9 =    up(num = 64, x = x8) #48
 
 x9 =    layers.Concatenate() ([x1, x9]) #48
 
 x9 =    basic (x = x9, num = 64)
 
-x10 = layers.Conv2DTranspose(32, (2,2),strides=(2,2), activation = 'relu')(x9) #96
+x10 = up(num = 32, x = x9) #96
 
 x10 = basic (x = x10, num = 32)
 

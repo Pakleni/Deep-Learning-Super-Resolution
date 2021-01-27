@@ -71,9 +71,10 @@ def denorm(x):
 
 
 
-train = True
-create = True
+train = Train
+create = Train
 
+patience = 10
 batch_size = 20
 n = 0.0003
 epochs = 400
@@ -96,10 +97,10 @@ if (train):
     if(create):
 
         
-        from models.basic import model
+        # from models.basic import model
         # from models.inception import model
         # from models.inception_no7 import model
-        # from models.unet import model
+        from models.unet import model
         # from models.depth import model
         # from models.resnet import model
 
@@ -157,7 +158,7 @@ if (train):
 
     #TRAIN DA BITCH
 
-    early_stopping = tf.keras.callbacks.EarlyStopping(patience=10)
+    early_stopping = tf.keras.callbacks.EarlyStopping(patience=patience)
 
     history = model.fit(x = the_lr_tr,
                         y = the_hr_tr,
@@ -169,14 +170,14 @@ if (train):
     #SAVE THE NN
     model.save("./saved-models/model.h5")
 
-    # sys.exit()
+    sys.exit()
 
     # PLOT DATA
     plt.plot(history.history['loss'], label='loss')
     plt.plot(history.history['val_loss'], label = 'val_loss')
     plt.xlabel('Epoch')
     plt.ylabel('Loss')
-    plt.ylim(top=0.12)
+    plt.ylim(top=10)
     plt.legend(loc='lower right')
 
 
