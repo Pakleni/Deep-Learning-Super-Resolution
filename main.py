@@ -75,7 +75,9 @@ def psnr_abs(y_true,y_pred):
     max_pixel = norm(255)
     return -(10.0 * K.log((max_pixel ** 2) / (K.mean(K.abs(y_pred - y_true + 1e-8), axis=-1)))) / 2.303
 
-
+srgan = tf.keras.models.load_model('./saved-models/srgan.h5')
+def SRGANLoss(y_true,y_pred):
+    return tf.reduce_mean(tf.square(srgan(y_pred)))
 
 
 os.system('clear')
@@ -100,13 +102,19 @@ rerun = False
 
 patience = 10
 batch_size = 20
+factorStride = 1
 n = 0.0003
 epochs = 400
-num = 3600
+num = 3200
+
 optimizer = keras.optimizers.Adam(learning_rate=n)
-loss_fn = VGGStyleLoss
+loss_fn = SRGANLoss
 
-
+custom_objects = {'SSIMLoss': SSIMLoss,
+                'VGGStyleLoss': VGGStyleLoss,
+                'vggLoss': vggLoss,
+                'psnr': psnr,
+                'SRGANLoss': SRGANLoss}
 
 
 if (train):
@@ -121,10 +129,10 @@ if (train):
     if(create):
 
         
-        # from models.basic import model
+        from models.basic import model
         # from models.inception import model
         # from models.inception_no7 import model
-        from models.unet import model
+        # from models.unet import model
         # from models.depth import model
         # from models.resnet import model
 
@@ -136,10 +144,7 @@ if (train):
                     metrics=['accuracy'])
     else:
         model = tf.keras.models.load_model('./saved-models/model.h5', 
-                                            custom_objects={'SSIMLoss': SSIMLoss, 
-                                                            'VGGStyleLoss': VGGStyleLoss, 
-                                                            'vggLoss': vggLoss,
-                                                            'psnr': psnr})
+                                            custom_objects=custom_objects)
         model.compile(optimizer=optimizer,
                     loss=loss_fn,
                     metrics=['accuracy'])
@@ -184,8 +189,7 @@ if (train):
     #END PREPARE
 
 
-    #TRAIN DA BITCH
-
+    #TRAIN
     early_stopping = tf.keras.callbacks.EarlyStopping(patience=patience)
 
     history = model.fit(x = the_lr_tr,
@@ -214,10 +218,7 @@ if (train):
 
 else:
     model = tf.keras.models.load_model('./saved-models/model.h5',
-                                    custom_objects={'SSIMLoss': SSIMLoss,
-                                                    'VGGStyleLoss': VGGStyleLoss,
-                                                    'vggLoss': vggLoss,
-                                                    'psnr': psnr})
+                                    custom_objects=custom_objects)
 
 
 
@@ -248,7 +249,7 @@ for lr_img, hr_img in valid_ds.take(40):
     width = int(lr_img_shape[1].numpy())
     height = int(lr_img_shape[0].numpy())
 
-    factorStride = 1
+    
     stride = lr_crop_size // factorStride
     # stride = 48
     
