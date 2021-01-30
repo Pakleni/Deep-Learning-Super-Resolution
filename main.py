@@ -42,13 +42,13 @@ def denorm(x):
 
 
 
-train = True
+train = False
 create = False
 rerun = True
 
 patience = 10
 batch_size = 20
-factorStride = 1
+factorStride = 4
 n = 0.0003
 epochs = 400
 num = 3200
