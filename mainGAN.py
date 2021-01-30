@@ -48,7 +48,6 @@ create = False
 rerun = True
 patience = 3
 batch_size = 20
-factorStride = 1
 n = 0.00001
 epochs = 400
 num = 3200

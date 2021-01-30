@@ -21,9 +21,9 @@ session = InteractiveSession(config=config)
 #end config stuff
 
 #UNCOMMENT THESE TWO IF USING VGG LOSS CAUSES PROBLEMS
-tf.config.experimental_run_functions_eagerly(True)
+# tf.config.experimental_run_functions_eagerly(True)
 
-tf.config.run_functions_eagerly(True)
+# tf.config.run_functions_eagerly(True)
 
 
 os.system('clear')
@@ -46,17 +46,17 @@ train = True
 create = False
 rerun = True
 
-patience = 3
-batch_size = 10
+patience = 10
+batch_size = 20
 factorStride = 1
-n = 0.00003
+n = 0.0003
 epochs = 400
 num = 3200
 
 from losses import *
 
 optimizer = keras.optimizers.Adam(learning_rate=n)
-loss_fn = SRGANVGGLoss
+loss_fn = SRGANLoss
 
 
 
