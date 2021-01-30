@@ -77,7 +77,9 @@ def psnr_abs(y_true,y_pred):
 
 srgan = tf.keras.models.load_model('./saved-models/srgan.h5')
 def SRGANLoss(y_true,y_pred):
-    return tf.reduce_mean(tf.square(srgan(y_pred)))
+    return tf.clip_by_value(t = srgan(y_pred)
+                            , clip_value_min = 0
+                            , clip_value_max = 1) * 0.01 + SSIMLoss(y_true,y_pred)
 
 
 os.system('clear')
@@ -96,14 +98,14 @@ def denorm(x):
 
 
 
-train = True
-create = True
-rerun = False
+train = False
+create = False
+rerun = True
 
-patience = 10
+patience = 3
 batch_size = 20
-factorStride = 1
-n = 0.0003
+factorStride = 4
+n = 0.00003
 epochs = 400
 num = 3200
 

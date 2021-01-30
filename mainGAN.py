@@ -75,6 +75,12 @@ def psnr_abs(y_true,y_pred):
     max_pixel = norm(255)
     return -(10.0 * K.log((max_pixel ** 2) / (K.mean(K.abs(y_pred - y_true + 1e-8), axis=-1)))) / 2.303
 
+srgan = tf.keras.models.load_model('./saved-models/srgan.h5')
+def SRGANLoss(y_true,y_pred):
+    return tf.clip_by_value(t = srgan(y_pred)
+                            , clip_value_min = 0
+                            , clip_value_max = 1) * 0.01 + SSIMLoss(y_true,y_pred)
+
 
 
 
@@ -89,12 +95,12 @@ def denorm(x):
 
 
 
-create = True
-rerun = False
-patience = 10
+create = False
+rerun = True
+patience = 3
 batch_size = 20
 factorStride = 1
-n = 0.00003
+n = 0.00001
 epochs = 400
 num = 3200
 optimizer = keras.optimizers.Adam(learning_rate=n)
@@ -114,7 +120,8 @@ train_ds = train_loader.dataset(batch_size=1, random_transform=True)
 custom_objects = {'SSIMLoss': SSIMLoss,
                 'VGGStyleLoss': VGGStyleLoss,
                 'vggLoss': vggLoss,
-                'psnr': psnr}
+                'psnr': psnr,
+                'SRGANLoss': SRGANLoss}
 
 main = tf.keras.models.load_model('./saved-models/model.h5',
                                     custom_objects=custom_objects)
