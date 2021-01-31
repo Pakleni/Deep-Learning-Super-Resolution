@@ -1,6 +1,4 @@
-****Deep Learning****
-
-****Super Resolution****
+****Deep Learning Super-Resolution****
 
 ********
 
