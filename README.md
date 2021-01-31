@@ -1,13 +1,3 @@
-****
-
-****
-
-****
-
-****
-
-****
-
 ****Deep Learning****
 
 ****Super Resolution****
