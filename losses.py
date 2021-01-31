@@ -26,7 +26,7 @@ def VGGStyleLoss(X,Y):
     
     layerNames = [ [1,2], [2,2], [3,4], [4,4], [5,4] ]
 
-    ret = 0;
+    ret = 0
     for i in layerNames:
 
         Yy = vgg_model.get_layer(name= f'block{i[0]}_conv{i[1]}').output
@@ -53,20 +53,28 @@ def psnr_abs(y_true,y_pred):
     return -(10.0 * K.log((max_pixel ** 2) / (K.mean(K.abs(y_pred - y_true + 1e-8), axis=-1)))) / 2.303
 
 srgan = tf.keras.models.load_model('./saved-models/srgan.h5')
+
+def SRGAN (y_true,y_pred):
+    return srgan(y_pred)
+
 def SRGANLoss(y_true,y_pred):
-    return tf.clip_by_value(t = srgan(y_pred)
-                            , clip_value_min = 0
-                            , clip_value_max = 1) * 0.01 + SSIMLoss(y_true,y_pred)
+    return -K.log(1 - SRGAN(y_true,y_pred)+ 1e-8) * 1e-2 + SSIMLoss(y_true,y_pred)
+
 
 def SRGANVGGLoss(y_true,y_pred):
-    return tf.clip_by_value(t = srgan(y_pred)
-                            , clip_value_min = 0
-                            , clip_value_max = 1) + vggLoss(y_true,y_pred)
+    return -K.log(1 - SRGAN(y_true,y_pred)+ 1e-8) * 1e-1 + VGGStyleLoss(y_true,y_pred)
 
 
 custom_objects = {'SSIMLoss': SSIMLoss,
                 'VGGStyleLoss': VGGStyleLoss,
                 'vggLoss': vggLoss,
                 'psnr': psnr,
+                'SRGAN': SRGAN,
                 'SRGANLoss': SRGANLoss,
                 'SRGANVGGLoss': SRGANVGGLoss}
+
+def norm(x):
+    return (x/255)
+
+def denorm(x):
+    return (x*255).astype("int32")

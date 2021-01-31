@@ -31,7 +31,7 @@ x = layers.Conv2D(512, (3, 3), activation='relu') (x) #4
 
 x = layers.Flatten()(x)
 
-decoded = layers.Dense(units = 1)(x) #1
+decoded = layers.Dense(units = 1, activation='sigmoid')(x) #1
 
 #model done
 model = keras.Model(Input_img, decoded)

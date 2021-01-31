@@ -29,30 +29,27 @@ session = InteractiveSession(config=config)
 
 
 
-from losses import *
 
 
 
 os.system('clear')
-
-def norm(x):
-    return (x/255)
-
-def denorm(x):
-    return (x*255).astype("int32")
 
 
 
 
 create = False
 rerun = True
+new_gan = False
 patience = 3
 batch_size = 20
-n = 0.00001
+n = 1e-5
 epochs = 400
 num = 3200
+
 optimizer = keras.optimizers.Adam(learning_rate=n)
 loss_fn = keras.losses.MeanSquaredError()
+
+early_stopping = tf.keras.callbacks.EarlyStopping(patience=patience, restore_best_weights=True)
 
 
 #LOAD DATA
@@ -64,9 +61,6 @@ train_loader = DIV2K(type='train')
 
 train_ds = train_loader.dataset(batch_size=1, random_transform=True)
 
-
-main = tf.keras.models.load_model('./saved-models/model.h5',
-                                    custom_objects=custom_objects)
 
 if(create):
     from models.srgan import model
@@ -81,9 +75,19 @@ else:
                 metrics=['accuracy'])
 
 
+model.save("./saved-models/srgan.h5")
+
+if (new_gan):
+    exit()
 
 
 #PREPARE DATA
+
+from losses import *
+
+
+main = tf.keras.models.load_model('./saved-models/model.h5',
+                                    custom_objects=custom_objects)
 
 the_lr_tr = []
 the_hr_tr = []
@@ -134,7 +138,6 @@ the_hr_vl = np.array(the_hr_vl)
 
 #TRAIN
 
-early_stopping = tf.keras.callbacks.EarlyStopping(patience=patience)
 
 history = model.fit(x = the_lr_tr,
                     y = the_hr_tr,
