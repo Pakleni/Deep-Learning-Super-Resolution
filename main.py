@@ -74,16 +74,14 @@ if(create):
 
     # print(model.summary())
     # exit(1)
-
-    model.compile(optimizer=optimizer,
-                loss=loss_fn,
-                metrics=metrics)
+    
 else:
     model = tf.keras.models.load_model('./saved-models/model.h5', 
                                         custom_objects=custom_objects)
-    model.compile(optimizer=optimizer,
-                loss=loss_fn,
-                metrics=metrics)
+
+model.compile(optimizer=optimizer,
+            loss=loss_fn,
+            metrics=metrics)
 
 
 
