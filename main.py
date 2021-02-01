@@ -35,7 +35,7 @@ valid_ds = valid_loader.dataset(batch_size=1, random_transform=True)
 from losses import *
 
 
-create = False
+create = True
 rerun = True
 
 batch_size = 10
@@ -71,6 +71,8 @@ if(create):
     # from models.unet import model
     # from models.depth import model
     # from models.resnet import model
+
+    # tf.keras.utils.plot_model(model, to_file='./model_images/unet.png', show_shapes=True)
 
     # print(model.summary())
     # exit(1)
