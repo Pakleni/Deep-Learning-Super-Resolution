@@ -1,6 +1,3 @@
-from data import DIV2K
-import matplotlib.pyplot as plt
-
 #config stuff
 from tensorflow.compat.v1 import ConfigProto
 from tensorflow.compat.v1 import InteractiveSession
@@ -28,39 +25,33 @@ for layer,new_layer in zip(model.layers,new_model.layers):
 model= new_model
 
 
-valid_loader = DIV2K(type='valid')
+import os
+images_dir = os.path.join('upscale-in')
+image_files = [os.path.join(images_dir, filename) for filename in sorted(os.listdir(images_dir))]
 
-valid_ds = valid_loader.dataset(batch_size=1, repeat_count=1, random_transform=False)
+ds = tf.data.Dataset.from_tensor_slices(image_files)
+ds = ds.map(tf.io.read_file)
+
+from tensorflow.python.data.experimental import AUTOTUNE
+ds = ds.map(lambda x: tf.image.decode_png(x, channels=3), num_parallel_calls=AUTOTUNE)
+
+ds = ds.batch(1)
 
 
-size = 240
+from PIL import Image
+import numpy as np
 
-for lr_img, hr_img in valid_ds.take(40):
+i = 0
 
-    # lr_img = hr_img
+for img in ds.take(1):
 
-    #OVDE SE SMANJUJE SLIKA ULAZNA
-    lr_img_shape = tf.shape(lr_img[0])[:2]
-    lr_img = lr_img.numpy()
+    img_temp = norm(img)
 
-    lr_img_temp = lr_img[0][0:size, 0:size]
-    lr_img = [lr_img_temp]
-    #KRAJ
-
-    lr_img_temp = norm(lr_img[0][None])
-
-    predictions = model.predict(lr_img_temp)
+    predictions = model.predict(img_temp)
     x=[denorm(y) for y in predictions[0]]
 
+    im = Image.fromarray(np.uint8(x))
 
-        
+    im.save(os.path.join("upscale-out", f"converted{i}.png"), format="png")
     
-    #print
-    plt.imshow(lr_img[0], cmap=plt.cm.binary)
-    plt.show()
-
-    plt.imshow(x, cmap=plt.cm.binary)
-    plt.show()
-
-    plt.imshow(hr_img[0,0:2*size,0:2*size], cmap=plt.cm.binary)
-    plt.show()
+    i += 1

@@ -7,3 +7,5 @@
 /DIV2K_valid_LR_bicubic
 /saved-models/*/
 /.vscode
+upscale-in
+upscale-out
