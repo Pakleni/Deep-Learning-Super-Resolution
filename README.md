@@ -150,3 +150,7 @@ koju od prethodno opisanih modela(mi smo koristili običnu konvolucionu).
 Diskriminator smo napravili sa konvolucionim i pooling slojevima nakon
 kojih ide jedan Fully-Connected sloj koji nam daje rezultat. Ova
 arhitektura nam je dala najbolje rezultate.
+
+---
+
+This repository uses a modified version of code from [here](https://github.com/krasserm/super-resolution/blob/179320c5cb005f57cd7e126cd8b3b669c793585a/data.py) in the `data.py` file.
